@@ -1,0 +1,61 @@
+# Angry Birds - Bird Trajectory
+
+# Explanation:
+# When the user is holding down the mouse button, call moveBird(). This calculates the 
+# direction and force as well as clamping the bird position so it can't be pulled back
+# too far.
+
+# Once the the user releases the mouse button, check to see if they have pulled the bird
+# back far enough. If they have, call launch() on the bird and pass in the direction
+# and force. 
+
+# In bird, normalize the direction and multiply it by force to get the velocity.
+# Also set launched to true. Then in the birds update method, move the bird using 
+# the velocity and take away a value from the y component every frame to get the
+# bird to move on a curved trajectory
+
+# ---
+
+# In slingshot
+
+default_bird_position # (Vector2) - The starting position of the bird when on the slingshot
+bird # (Bird) - The bird in the slingshot
+
+bird_direction # (Vector2) - the direction the bird is facing in the slingshot
+distance_from_start # (float) - the distance between default_bird_position and the bird
+
+MAX_DRAG_DISTANCE # (float) - the max distance the bird can be pulled back
+MIN_DRAG_DISTANCE # (float) - the min distance the bird has to be pulled back to shoot
+
+# Called every frame if the user is holding down the mouse button
+moveBird:
+    slingshot_to_mouse = mouse.position - default_bird_position 
+    bird_direction = Vector2(default_bird_position.x + CLAMP(slingshot_to_mouse.x, MAX_DRAG_DISTANCE, -MAX_DRAG_DISTANCE)
+                             default_bird_position.y + CLAMP(slingshot_to_mouse.y, MAX_DRAG_DISTANCE, -MAX_DRAG_DISTANCE))
+    distance_from_start = DISTANCE BETWEEN default_bird_position and bird
+    
+# Called when the user releases the mouse button
+launch:
+    IF distance_from_start > MIN_DRAG_DISTANCE:
+        bird.launch(default_bird_position - bird_direction, distance_from_start)
+    ELSE:
+        bird_direction = (0, 0)
+        bird.position = default_bird_position
+
+# In bird
+
+velocity # (Vector2) - The velocity of the bird
+launched # (bool) - Set to true once the bird is launched
+
+MASS # (float) - How fast the bird will fall
+
+# Called every frame
+update(dt):
+    IF launched:
+        bird.move(velocity * dt)
+        velocity.y -= MASS
+
+# Called from slingshot
+launch(direction, force):
+    velocity = direction.normalized * force
+    launched = true
